@@ -1,3 +1,7 @@
+package fleet;
+
+import renter.Renter;
+
 // Abstract base class for all vehicles in the Dovewing fleet.
 // Holds ONE private reference (currentRental) as the single source of truth
 // for status: isAvailable() and isRented() are derived from it, so a vehicle
@@ -67,7 +71,7 @@ public abstract class Vehicle {
         return "AVAILABLE";
     }
 
-    // Package-private so only Depot can attach or clear a rental on a vehicle.
+    // Package-private inside fleet so only Depot can attach or clear a rental.
     void assignRental(Rental rental) {
         this.currentRental = rental;
     }

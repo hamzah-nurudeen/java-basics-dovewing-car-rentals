@@ -1,3 +1,7 @@
+package fleet;
+
+import renter.Renter;
+
 // Commercial van vehicle class with its own deposit rule:
 // Because commercial vans carry heavy cargo risk, members pay half (50%) of the
 // base deposit instead of having the entire deposit waived, while casual renters

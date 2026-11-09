@@ -1,3 +1,5 @@
+package renter;
+
 // Casual renter type: standard deposit is required.
 public class CasualRenter implements RenterType {
 

@@ -1,3 +1,5 @@
+package renter;
+
 // Member renter type: standard deposit is waived.
 public class MemberRenter implements RenterType {
 

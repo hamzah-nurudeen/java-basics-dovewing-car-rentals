@@ -6,11 +6,33 @@ See [DIAGNOSIS.md](DIAGNOSIS.md) for the defect analysis, risk ranking, and clas
 
 ---
 
-## 1. Running the Program (JDK 21, Core Java Only)
+## 1. Project Structure & Running the Program (JDK 21, Core Java Only)
+
+```text
+src/main/java/
+├── RentalTracker.java                  # Main entry point
+├── exceptions/
+│   ├── VehicleNotAvailableException.java
+│   └── VehicleNotRentedException.java
+├── fleet/
+│   ├── Vehicle.java
+│   ├── EconomyVehicle.java
+│   ├── PremiumVehicle.java
+│   ├── CommercialVanVehicle.java
+│   ├── Rental.java
+│   └── Depot.java
+├── renter/
+│   ├── RenterType.java
+│   ├── CasualRenter.java
+│   ├── MemberRenter.java
+│   └── Renter.java
+└── ui/
+    └── ConsolePrinter.java
+```
 
 **Directly with `javac` / `java`:**
 ```bash
-javac --release 21 -d target/classes src/main/java/*.java
+javac --release 21 -d target/classes -sourcepath src/main/java src/main/java/RentalTracker.java src/main/java/fleet/CommercialVanVehicle.java
 java -cp target/classes RentalTracker
 ```
 
@@ -81,10 +103,10 @@ Active rentals:
   - Whenever two fields store the same fact, a bug can update one and leave the other stale — which is how the original code allowed a car to show as `AVAILABLE` and have an `ACTIVE` rental at the same time.
   - By deriving `isAvailable()`, `isRented()`, and `Rental.isActive()` from the single `Vehicle.currentRental` field, a contradictory state is impossible.
 
-### Decision 3: Encapsulated State Transitions and Derived Counts
+### Decision 3: Package-Private Encapsulation (`fleet` Package) and Derived Counts
 - **What we chose**:
   - All fields on `Vehicle`, `Renter`, `Rental`, and `Depot` are `private`.
-  - `Vehicle.assignRental(Rental)` and `Vehicle.clearRental()` are package-private with no public setters.
+  - `Vehicle`, `Rental`, and `Depot` live together in the `fleet` package, where `Vehicle.assignRental(Rental)` and `Vehicle.clearRental()` are **package-private** with no public setters — so outside classes (`RentalTracker`, `ui`, `renter`) cannot flip vehicle status.
   - `Depot.getFleetSize()`, `Depot.getRentedCount()`, and `Depot.getAvailableCount()` are computed from `vehicles`, and `getVehicles()`, `getRenters()`, and `getRentals()` return defensive `ArrayList` copies.
 - **Alternative rejected**:
   - Public setters or manual counter fields.
@@ -108,8 +130,12 @@ Active rentals:
 Next quarter Dovewing is adding a **Commercial Van** class with its own deposit rules.
 
 ### With the Rebuilt Design
-1. **Create one new file**: `src/main/java/CommercialVanVehicle.java` extending `Vehicle`:
+1. **Create one new file**: `src/main/java/fleet/CommercialVanVehicle.java` extending `Vehicle`:
    ```java
+   package fleet;
+
+   import renter.Renter;
+
    public class CommercialVanVehicle extends Vehicle {
 
        public CommercialVanVehicle(String model, String reg, double dailyRate, double baseDeposit) {

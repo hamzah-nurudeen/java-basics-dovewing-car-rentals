@@ -1,3 +1,5 @@
+package exceptions;
+
 // Thrown when attempting to rent a vehicle that is already rented out.
 public class VehicleNotAvailableException extends RuntimeException {
 

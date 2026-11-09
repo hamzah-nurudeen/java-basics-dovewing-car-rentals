@@ -1,13 +1,17 @@
-// Economy vehicle class with economy daily rate and deposit rules.
-public class EconomyVehicle extends Vehicle {
+package fleet;
 
-    public EconomyVehicle(String model, String reg, double dailyRate, double baseDeposit) {
+import renter.Renter;
+
+// Premium vehicle class isolated from economy pricing and deposit rules.
+public class PremiumVehicle extends Vehicle {
+
+    public PremiumVehicle(String model, String reg, double dailyRate, double baseDeposit) {
         super(model, reg, dailyRate, baseDeposit);
     }
 
     @Override
     public String getCategory() {
-        return "ECONOMY";
+        return "PREMIUM";
     }
 
     @Override

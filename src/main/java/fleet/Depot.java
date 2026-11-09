@@ -1,5 +1,11 @@
+package fleet;
+
+import exceptions.VehicleNotAvailableException;
+import exceptions.VehicleNotRentedException;
 import java.util.ArrayList;
 import java.util.List;
+import renter.Renter;
+import ui.ConsolePrinter;
 
 // Coordinates the depot's fleet, registered renters, and rental operations.
 // Enforces that a vehicle can only be rented when available and only returned when rented.

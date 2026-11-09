@@ -1,3 +1,7 @@
+package fleet;
+
+import renter.Renter;
+
 // Records a single vehicle rental transaction.
 // Whether this rental is active is derived from vehicle.getCurrentRental() == this,
 // so a Rental and its Vehicle can never disagree on status.

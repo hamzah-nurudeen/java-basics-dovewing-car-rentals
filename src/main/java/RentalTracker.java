@@ -1,3 +1,13 @@
+import exceptions.VehicleNotAvailableException;
+import fleet.Depot;
+import fleet.EconomyVehicle;
+import fleet.PremiumVehicle;
+import fleet.Vehicle;
+import renter.CasualRenter;
+import renter.MemberRenter;
+import renter.Renter;
+import ui.ConsolePrinter;
+
 // Dovewing Car Rentals - fleet and rental tracker entry point.
 public class RentalTracker {
 

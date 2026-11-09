@@ -1,4 +1,9 @@
+package ui;
+
+import fleet.Rental;
+import fleet.Vehicle;
 import java.util.List;
+import renter.Renter;
 
 // Centralizes all console messages so formatting is separate from fleet logic.
 public class ConsolePrinter {
