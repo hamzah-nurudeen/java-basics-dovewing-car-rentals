@@ -4,8 +4,8 @@ package renter;
 public class CasualRenter implements RenterType {
 
     @Override
-    public String getKind() {
-        return "CASUAL";
+    public RenterKind getKind() {
+        return RenterKind.CASUAL;
     }
 
     @Override

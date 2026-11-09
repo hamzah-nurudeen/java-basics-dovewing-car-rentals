@@ -15,6 +15,12 @@ public class Renter {
     private final List<String> history = new ArrayList<String>();
 
     public Renter(String name, RenterType type) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Renter name must not be blank.");
+        }
+        if (type == null) {
+            throw new IllegalArgumentException("Renter type must not be null.");
+        }
         this.id = counter;
         counter++;
         this.name = name;
@@ -42,10 +48,13 @@ public class Renter {
     }
 
     public void setType(RenterType type) {
+        if (type == null) {
+            throw new IllegalArgumentException("Renter type must not be null.");
+        }
         this.type = type;
     }
 
-    public String getKind() {
+    public RenterKind getKind() {
         return type.getKind();
     }
 

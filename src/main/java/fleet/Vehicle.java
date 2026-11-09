@@ -17,6 +17,18 @@ public abstract class Vehicle {
     private Rental currentRental;
 
     protected Vehicle(String model, String reg, double dailyRate, double baseDeposit) {
+        if (model == null || model.isBlank()) {
+            throw new IllegalArgumentException("Vehicle model must not be blank.");
+        }
+        if (reg == null || reg.isBlank()) {
+            throw new IllegalArgumentException("Vehicle registration must not be blank.");
+        }
+        if (dailyRate < 0) {
+            throw new IllegalArgumentException("Daily rate must not be negative.");
+        }
+        if (baseDeposit < 0) {
+            throw new IllegalArgumentException("Base deposit must not be negative.");
+        }
         this.id = counter;
         counter++;
         this.model = model;
@@ -46,7 +58,7 @@ public abstract class Vehicle {
         return baseDeposit;
     }
 
-    public abstract String getCategory();
+    public abstract VehicleCategory getCategory();
 
     public abstract double calculateCost(int days);
 
@@ -64,11 +76,11 @@ public abstract class Vehicle {
         return currentRental;
     }
 
-    public String getStatus() {
+    public VehicleStatus getStatus() {
         if (isRented()) {
-            return "RENTED";
+            return VehicleStatus.RENTED;
         }
-        return "AVAILABLE";
+        return VehicleStatus.AVAILABLE;
     }
 
     // Package-private inside fleet so only Depot can attach or clear a rental.

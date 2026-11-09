@@ -5,7 +5,7 @@ package renter;
 // without replacing the Renter object or losing their rental history.
 public interface RenterType {
 
-    String getKind();
+    RenterKind getKind();
 
     boolean isDepositWaived();
 }

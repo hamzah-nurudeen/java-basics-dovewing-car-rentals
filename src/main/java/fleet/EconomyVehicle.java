@@ -10,8 +10,8 @@ public class EconomyVehicle extends Vehicle {
     }
 
     @Override
-    public String getCategory() {
-        return "ECONOMY";
+    public VehicleCategory getCategory() {
+        return VehicleCategory.ECONOMY;
     }
 
     @Override

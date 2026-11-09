@@ -61,10 +61,10 @@ public class Rental {
         return vehicle.getCurrentRental() == this;
     }
 
-    public String getStatus() {
+    public RentalStatus getStatus() {
         if (isActive()) {
-            return "ACTIVE";
+            return RentalStatus.ACTIVE;
         }
-        return "RETURNED";
+        return RentalStatus.RETURNED;
     }
 }

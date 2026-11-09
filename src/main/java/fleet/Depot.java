@@ -17,6 +17,9 @@ public class Depot {
     private final ConsolePrinter printer = new ConsolePrinter();
 
     public Depot(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Depot name must not be blank.");
+        }
         this.name = name;
     }
 
@@ -25,14 +28,29 @@ public class Depot {
     }
 
     public void addVehicle(Vehicle v) {
+        if (v == null) {
+            throw new IllegalArgumentException("Vehicle must not be null.");
+        }
         vehicles.add(v);
     }
 
     public void addRenter(Renter r) {
+        if (r == null) {
+            throw new IllegalArgumentException("Renter must not be null.");
+        }
         renters.add(r);
     }
 
     public void rent(Renter r, Vehicle v, int days) {
+        if (r == null) {
+            throw new IllegalArgumentException("Renter must not be null.");
+        }
+        if (v == null) {
+            throw new IllegalArgumentException("Vehicle must not be null.");
+        }
+        if (days <= 0) {
+            throw new IllegalArgumentException("Rental days must be at least 1.");
+        }
         if (v.isRented()) {
             throw new VehicleNotAvailableException(
                     v.getModel() + " (" + v.getReg() + ") is already rented.");
@@ -47,6 +65,9 @@ public class Depot {
     }
 
     public void returnVehicle(Vehicle v) {
+        if (v == null) {
+            throw new IllegalArgumentException("Vehicle must not be null.");
+        }
         if (v.isAvailable()) {
             throw new VehicleNotRentedException(
                     v.getModel() + " (" + v.getReg() + ") is not currently rented.");

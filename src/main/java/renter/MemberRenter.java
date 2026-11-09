@@ -4,8 +4,8 @@ package renter;
 public class MemberRenter implements RenterType {
 
     @Override
-    public String getKind() {
-        return "MEMBER";
+    public RenterKind getKind() {
+        return RenterKind.MEMBER;
     }
 
     @Override

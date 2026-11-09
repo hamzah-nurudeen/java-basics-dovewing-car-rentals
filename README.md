@@ -1,42 +1,59 @@
 # Dovewing Car Rentals — Fleet and Rental Tracker
 
-This repository contains the diagnosis, rebuilt codebase, and design notes for the **Dovewing Car Rentals** fleet and rental tracker.
+This repository contains the diagnosis, rebuilt codebase, verification checks, and design notes for the **Dovewing Car Rentals** fleet and rental tracker.
 
-See [DIAGNOSIS.md](DIAGNOSIS.md) for the defect analysis, risk ranking, and class diagram.
+See [DIAGNOSIS.md](DIAGNOSIS.md) for the full defect analysis, business risk ranking, and class diagram.
 
 ---
 
-## 1. Project Structure & Running the Program (JDK 21, Core Java Only)
+## 1. Repository Structure & Running the Program (JDK 21, Core Java Only)
 
 ```text
-src/main/java/
-├── RentalTracker.java                  # Main entry point
-├── exceptions/
-│   ├── VehicleNotAvailableException.java
-│   └── VehicleNotRentedException.java
-├── fleet/
-│   ├── Vehicle.java
-│   ├── EconomyVehicle.java
-│   ├── PremiumVehicle.java
-│   ├── CommercialVanVehicle.java
-│   ├── Rental.java
-│   └── Depot.java
-├── renter/
-│   ├── RenterType.java
-│   ├── CasualRenter.java
-│   ├── MemberRenter.java
-│   └── Renter.java
-└── ui/
-    └── ConsolePrinter.java
+.
+├── DIAGNOSIS.md                            # Pre-refactor defect analysis & class diagram
+├── README.md                               # Design decisions & extensibility notes
+├── pom.xml                                 # Maven build configuration (Java 21)
+└── src/
+    ├── main/java/
+    │   ├── RentalTracker.java              # Main entry point
+    │   ├── exceptions/
+    │   │   ├── VehicleNotAvailableException.java
+    │   │   └── VehicleNotRentedException.java
+    │   ├── fleet/
+    │   │   ├── Vehicle.java
+    │   │   ├── VehicleCategory.java
+    │   │   ├── VehicleStatus.java
+    │   │   ├── EconomyVehicle.java
+    │   │   ├── PremiumVehicle.java
+    │   │   ├── Rental.java
+    │   │   ├── RentalStatus.java
+    │   │   └── Depot.java
+    │   ├── renter/
+    │   │   ├── RenterType.java
+    │   │   ├── RenterKind.java
+    │   │   ├── CasualRenter.java
+    │   │   ├── MemberRenter.java
+    │   │   └── Renter.java
+    │   └── ui/
+    │       └── ConsolePrinter.java
+    └── test/java/
+        └── DepotTest.java                  # Executable verification suite (core Java)
 ```
 
-**Directly with `javac` / `java`:**
+### Compile and Run the Main Program (Plain `javac` / `java`)
 ```bash
-javac --release 21 -d target/classes -sourcepath src/main/java src/main/java/RentalTracker.java src/main/java/fleet/CommercialVanVehicle.java
+javac --release 21 -d target/classes src/main/java/RentalTracker.java src/main/java/exceptions/*.java src/main/java/fleet/*.java src/main/java/renter/*.java src/main/java/ui/*.java
 java -cp target/classes RentalTracker
 ```
 
-**With Maven:**
+### Compile and Run the Verification Checks (`DepotTest`)
+```bash
+javac --release 21 -d target/test-classes -cp target/classes src/test/java/DepotTest.java
+java -cp "target/classes;target/test-classes" DepotTest
+```
+*(On macOS/Linux, replace `;` with `:` in `-cp`.)*
+
+### Compile and Run with Maven (`pom.xml` included)
 ```bash
 mvn compile
 mvn exec:java -Dexec.mainClass=RentalTracker
@@ -44,7 +61,7 @@ mvn exec:java -Dexec.mainClass=RentalTracker
 
 ### Console Output (Before vs. After)
 
-**Before (Original Code):**
+**Before (Original Starter Code):**
 Allowed `vitz` (`GT-1234-20`) to be rented to Ama while already out with Kofi, leaving two active rentals for the same car:
 ```text
 Rented Toyota Vitz (GT-1234-20) to Kofi Mensah for 3 days, cost GHS 450.0, deposit GHS 500.0
@@ -83,10 +100,11 @@ Active rentals:
 
 ### Decision 1: Inheritance for Vehicles (`abstract class Vehicle`) vs. Interface + Composition for Renters (`RenterType` inside `Renter`)
 - **What we chose**:
-  - `Vehicle` is an `abstract` class with `private` fields and abstract methods `getCategory()`, `calculateCost(int days)`, and `calculateDeposit(Renter renter)`. `EconomyVehicle`, `PremiumVehicle`, and `CommercialVanVehicle` extend `Vehicle`.
+  - `Vehicle` is an `abstract` class with `private` fields and abstract methods `getCategory()`, `calculateCost(int days)`, and `calculateDeposit(Renter renter)`. `EconomyVehicle` and `PremiumVehicle` extend `Vehicle`.
   - `RenterType` is an interface (`getKind()`, `isDepositWaived()`) implemented by `CasualRenter` and `MemberRenter` and **composed** inside `Renter` (`private RenterType type`).
+  - Category, status, and renter-kind identifiers are centralized in enums (`VehicleCategory`, `VehicleStatus`, `RentalStatus`, `RenterKind`) rather than scattered magic strings.
 - **Alternative rejected**:
-  - Using `if/else` chains on strings (`"ECONOMY"`, `"PREMIUM"`, `"MEMBER"`) inside `Depot.rent()`, or using inheritance for `Renter` (`CasualRenter extends Renter`).
+  - Using `if/else` chains on raw strings (`"ECONOMY"`, `"PREMIUM"`, `"MEMBER"`) inside `Depot.rent()`, or using inheritance for `Renter` (`CasualRenter extends Renter`).
 - **Why**:
   - A physical vehicle's class never changes over its lifetime (a Toyota Vitz is always an economy car), so inheritance (*is-a*) fits `Vehicle` and keeps economy pricing isolated from premium pricing.
   - A customer (`Kofi Mensah`), however, can start as a casual renter and later become a member. Composing `RenterType` inside `Renter` lets Kofi upgrade via `kofi.setType(new MemberRenter())` without creating a new `Renter` object or losing his `id` and rental `history`.
@@ -125,44 +143,37 @@ Active rentals:
 
 ---
 
-## 3. How to Add a New Vehicle Class (Commercial Van Guide & Improvement)
+## 3. How the Commercial-Van Class Will Be Added Next Quarter
 
-Next quarter Dovewing is adding a **Commercial Van** class with its own deposit rules.
+When Dovewing introduces its **Commercial Van** class next quarter:
 
-### With the Rebuilt Design
-1. **Create one new file**: `src/main/java/fleet/CommercialVanVehicle.java` extending `Vehicle`:
-   ```java
-   package fleet;
+1. **Add `COMMERCIAL_VAN` to `VehicleCategory`** and **create one new subclass `CommercialVanVehicle` extending `Vehicle`** in `src/main/java/fleet/`:
+   - Override `getCategory()` to return `VehicleCategory.COMMERCIAL_VAN`.
+   - Override `calculateCost(int days)` and `calculateDeposit(Renter renter)` with the commercial van's specific deposit rule.
+2. **Existing files needing zero changes**: `Vehicle.java`, `EconomyVehicle.java`, `PremiumVehicle.java`, `Renter.java`, `RenterType.java`, `Rental.java`, `Depot.java`, and `ConsolePrinter.java` require **zero edits** because `Depot.rent()` delegates cost and deposit calculation polymorphically to `Vehicle`.
 
-   import renter.Renter;
+### What the ORIGINAL Starter Code Would Have Forced Us to Change
+In the untouched starter code (`git show e09ead6:src/main/java/RentalTracker.java`), `Depot.rent()` branched on raw category strings and fell through silently when a category was not `"ECONOMY"` or `"PREMIUM"`:
+```java
+if (v.category.equals("ECONOMY")) {
+    cost = v.dailyRate * days;
+    deposit = v.deposit;
+    if (r.kind.equals("MEMBER")) {
+        deposit = 0;
+    }
+    v.status = "RENTED";
+    System.out.println(...);
+} else if (v.category.equals("PREMIUM")) {
+    // duplicated block ...
+}
+r.history.add("Rented " + v.model);
+rentals.add(new Rental(r.name, v.reg, days, cost, deposit));
+```
+Adding a commercial van in the original code required modifying `Depot.rent()` directly to add another `else if` branch. If a developer added a van without updating `Depot.rent()`, the original code left `v.status` as `"AVAILABLE"` while still executing `rentals.add(...)` with `cost = 0` and `deposit = 0`.
 
-   public class CommercialVanVehicle extends Vehicle {
+---
 
-       public CommercialVanVehicle(String model, String reg, double dailyRate, double baseDeposit) {
-           super(model, reg, dailyRate, baseDeposit);
-       }
+## 4. One Improvement Beyond the Brief: Input Validation at Domain Boundaries
 
-       @Override
-       public String getCategory() {
-           return "COMMERCIAL_VAN";
-       }
-
-       @Override
-       public double calculateCost(int days) {
-           return getDailyRate() * days;
-       }
-
-       @Override
-       public double calculateDeposit(Renter renter) {
-           if (renter.isDepositWaived()) {
-               return getBaseDeposit() * 0.5; // Members pay 50% cargo deposit on vans
-           }
-           return getBaseDeposit();
-       }
-   }
-   ```
-2. **Existing files modified**: **Zero** (`Vehicle.java`, `EconomyVehicle.java`, `PremiumVehicle.java`, `Renter.java`, `RenterType.java`, `Rental.java`, `Depot.java`, and `ConsolePrinter.java` require 0 changes).
-
-### What the ORIGINAL Code Would Have Forced Us to Change
-- In the original `RentalTracker.java`, adding `"COMMERCIAL_VAN"` required editing `Depot.rent()` (lines 113–136) to add another `else if (v.category.equals("COMMERCIAL_VAN"))` branch and repeating the cost calculation, deposit waiver check, status assignment, and print statement.
-- If someone created a `"COMMERCIAL_VAN"` vehicle without editing `Depot.rent()`, the original code silently skipped the `if / else if` branches, left the van `AVAILABLE`, and created an `ACTIVE` rental with **cost GHS 0.0 and deposit GHS 0.0**.
+- **What we added**: Fail-fast input validation with descriptive `IllegalArgumentException` messages in `Vehicle` (rejecting blank model/registration or negative daily rate/base deposit), `Renter` (rejecting blank name or null `RenterType`), and `Depot` (rejecting null vehicles/renters or `days <= 0` in `rent()`).
+- **Why it helps Dovewing**: In the original code, passing `0` or `-2` days to `Depot.rent()` silently created an `ACTIVE` rental with zero or negative cost (`GHS -1200.0`), corrupting daily revenue totals. Validating inputs at construction and rental time prevents bad data from entering the depot.

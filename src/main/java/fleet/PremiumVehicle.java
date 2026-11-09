@@ -10,8 +10,8 @@ public class PremiumVehicle extends Vehicle {
     }
 
     @Override
-    public String getCategory() {
-        return "PREMIUM";
+    public VehicleCategory getCategory() {
+        return VehicleCategory.PREMIUM;
     }
 
     @Override
